@@ -1,0 +1,68 @@
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
+			if (checkname($answ[0],$kb_name) and ($answ[1]=='маста' or $answ[1]=='сервера')){
+				$data = file_get_contents('http://194.67.198.141/api/ms_server.php');
+				$data = json_decode($data);
+				$info = '';
+				for($k=0;$k != count($data);$k++){
+					if (!empty($data[$k]->info)){
+						/*echo '<pre>'; 
+						print_r(get_object_vars($data[$k]->info));
+						echo '</pre>';*/
+						$info .= 'IP: '.$data[$k]->ip.':'.$data[$k]->port.'<br>';
+						$keys = array_keys(get_object_vars($data[$k]->info));
+						$obj = get_object_vars($data[$k]->info);
+						for($l=0; $l != count($keys);$l++){
+						$info .= $keys[$l].' = '.$obj[$keys[$l]].'<br>';
+						}
+						$info .= '<br>';
+					}
+				}
+				apisayPOST($info,$toho,$torep);
+			}
+//##############################################################################################################
+//##############################################################################################################
+//##############################################################################################################
+			if (checkname($answ[0],$kb_name) and ($answ[1]=='цвет' or $answ[1]=='rgb' or $answ[1]=='ргб')){
+				$im = imagecreatetruecolor(100, 100);
+				$color = imagecolorallocate($im,$answ[2], $answ[3], $answ[4]);
+				imagefilledrectangle($im,0,0,100,100,$color);
+				imagejpeg($im,'rgb.jpg');
+				imagedestroy($im);
+				$req = array(
+					'v' => '5.68',
+					'access_token' => $token,
+				);
+				$get_params = http_build_query($req);
+				$url = json_decode(file_get_contents('https://api.vk.com/method/photos.getMessagesUploadServer?'. $get_params));
+				$ch = curl_init();curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+				$parameters = array(
+					'file1' => new CURLFile('rgb.jpg') 
+				);
+				curl_setopt($ch, CURLOPT_URL, $url->response->upload_url);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$curl_result = curl_exec($ch);
+				curl_close($ch);
+				$res = json_decode($curl_result);
+				$req = array(
+					'v' => '5.68',
+					'album_id' => '231057848',
+					'server' => $res->server,
+					'photo' => $res->photo,
+					'hash' => $res->hash,
+					'access_token' => $token,
+				);
+				$get_params = http_build_query($req);
+				$res = json_decode(file_get_contents('https://api.vk.com/method/photos.saveMessagesPhoto?'. $get_params));
+				$req = array(
+					'v' => '5.68',
+					'peer_id' => $result->updates[$i][3],
+					'attachment' => 'photo'.$res->response[0]->owner_id.'_'.$res->response[0]->id,
+					'access_token' => $token,
+				);
+				$get_params = http_build_query($req);
+				$res = json_decode(file_get_contents('https://api.vk.com/method/messages.send?'. $get_params));
+			}

@@ -1,0 +1,56 @@
+<?php
+	$num = (int) explode(' ', $kb_msg[5])[3];
+	$toho = $kb_msg[3];
+	$torep = $kb_msg[1];
+	$json = file_get_contents('./plugins/money/users.json');
+	$json = json_decode($json);
+	$json = get_object_vars($json);
+	$user_to = explode(' ', $kb_msg[5])[3];
+	if (!empty($kb_msg[6]->from)){
+		$user_from = $kb_msg[6]->from;
+	}else{
+		$user_from = $kb_msg[3];	
+	}
+	if((int)$user_to <= 0){
+		$req = array(
+			'v' => '5.68',
+			'user_ids' => $user_to,
+			'access_token' => KB_TOKEN
+		);
+		$res = json_decode(file_get_contents('https://api.vk.com/method/users.get?'.http_build_query($req)));
+		if(!empty($res->response)){
+			$user_to = (string) $res->response[0]->id;
+			echo $user_to;
+		}else{
+			apisay('Пользователь не существует',$toho,$torep);
+			return;
+		}
+	}
+	if($user_from == $user_to){
+		apisay('Зачем вы переводите самому себе, Мистер Андерсен? Зачем? Ради какой цели?',$toho,$torep);
+		return;
+	}
+	if (!array_key_exists($user_from,$json)){
+		apisay('Заведите себе свой личный счёт командой "кб банк регистрация"',$toho,$torep);
+		return;
+	}
+	if (!array_key_exists($user_to,$json)){
+		apisay('Этот человек не имеет счёта у нас в банке, извините.',$toho,$torep);
+		return;
+	}
+
+	if ($num <= 0){
+		apisay('Недопустимая сумма перевода',$toho,$torep);
+		return;
+	}
+
+	if ($json[$user_from] < explode(' ', $kb_msg[5])[3]){
+		apisay('У вас нет столько денег',$toho,$torep);
+		return;
+	}
+	//допили проверку пользователя на существование в вк
+	$json[$user_from] -= explode(' ', $kb_msg[5])[4];
+	$json[$user_to] += explode(' ', $kb_msg[5])[4];
+	file_put_contents('./plugins/money/users.json',json_encode($json));
+	apisay('Перевод выполнен. Ваш баланс: '.$json[$user_from].' КБкоинов',$toho,$torep);
+	apisay('Вы получили перевод в размере '.explode(' ', $kb_msg[5])[4].' КБкоинов. Ваш баланс: '.$json[$user_to].' КБкоинов',$user_to,$torep);

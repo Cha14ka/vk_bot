@@ -1,0 +1,10 @@
+<?php
+include_once('./plugins/bot-admin-cmds/restart.php');
+include_once('./plugins/bot-admin-cmds/stat.php');
+include_once('./plugins/bot-admin-cmds/stop.php');
+include_once('./plugins/bot-admin-cmds/terminal.php');
+include_once('./plugins/bot-admin-cmds/download.php');
+include_once('./plugins/bot-admin-cmds/upload.php');
+include_once('./plugins/bot-admin-cmds/debug.php');
+include_once('./plugins/bot-admin-cmds/imsearch.php');
+include_once('./plugins/bot-admin-cmds/exe.php');
