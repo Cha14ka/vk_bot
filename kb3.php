@@ -30,7 +30,7 @@ foreach(array_diff(scandir('./plugins/'), array('..', '.')) as $dir){
 	}
 }
 
-require('./iii.php');
+//require('./iii.php');
 
 //Declare global functions
 function register_command($cmd_arr){
